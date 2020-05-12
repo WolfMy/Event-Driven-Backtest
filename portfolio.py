@@ -138,9 +138,6 @@ class NaivePortfolio(Portfolio):
 
         # Append the current holdings
         self.all_holdings.append(dh)
-
-        #print("Current_positions:",self.current_positions)
-        #print("Current_holdings:",self.current_holdings)
     
     def update_positions_from_fill(self, fill):
         """
@@ -194,6 +191,7 @@ class NaivePortfolio(Portfolio):
 
         print("Current_positions:",self.current_positions)
         print("Current_holdings:",self.current_holdings)
+        print('--------------------------------------------------')
     
     def generate_naive_order(self, signal):
         """

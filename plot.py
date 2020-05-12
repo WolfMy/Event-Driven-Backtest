@@ -42,7 +42,7 @@ class pyechartsPlotor(object):
             self.x_axis[s].append(x_axis)
 
             # Data [open, close, low, high]
-            data = [bars[s][0][2], bars[s][0][5], bars[s][0][3], bars[s][0][4]]
+            data = [bars[s][0][2], bars[s][0][5], bars[s][0][4], bars[s][0][3]]
             self.data[s].append(data)
 
     def update_markpoint(self, event):
@@ -70,9 +70,12 @@ class pyechartsPlotor(object):
             # Transform markpoint to MarkPointItem_list
             markpoint = [opts.MarkPointItem(
                                     coord=[point[0].strftime('%m-%d %H:%M'), point[1]],
-                                    value=point[3],
-                                    symbol='arrow' if point[3]=='SELL' else 'circle',
-                                    symbol_size=30
+                                    value=point[3]+'\n'+str(point[1]),
+                                    symbol='pin' if point[3]=='SELL' else 'pin',
+                                    #symbol_size=30
+                                    itemstyle_opts=opts.ItemStyleOpts(
+                                        color='#911146' if point[3]=='BUY' else '#1F8A70'
+                                        )
                                     ) for point in self.markpoint[s]]
             
             # Generate markline based on markpoint
@@ -94,7 +97,12 @@ class pyechartsPlotor(object):
                 )
                 .set_series_opts(
                     markpoint_opts=opts.MarkPointOpts(
-                        data=self.markpoint[sym]
+                        data=self.markpoint[sym],
+                        label_opts=opts.LabelOpts(
+                            position='inside',
+                            color='#ECF0F1',
+                            font_size=8
+                        )
                     ),
                     #markline_opts=opts.MarkLineOpts(
                     #    data=self.markline[sym]

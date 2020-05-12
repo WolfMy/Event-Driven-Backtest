@@ -40,6 +40,7 @@ class DoubleMAStrategy(Strategy):
         self.bars = bars
         self.symbol_list = self.bars.symbol_list
         self.events = events
+        self.latest_signal_datetime = None
         self.ma_data  = {}
 
         # Once buy & hold signal is given, these are set to True
@@ -80,18 +81,24 @@ class DoubleMAStrategy(Strategy):
                 ma1_list = self.ma_data[s]['MA_'+str(self.ma1_timeperiod)]
                 ma2_list = self.ma_data[s]['MA_'+str(self.ma2_timeperiod)]
                 try:
-                    if ma1_list[-1] >= ma2_list[-1] and ma1_list[-2] < ma2_list[-2] and self.bought[s] == False:
-                        # MA1均线上穿MA2均线，买入信号
-                        # (Symbol, Datetime, Type = LONG, SHORT or EXIT)
-                        signal = SignalEvent(bars[0][0], bars[0][1], 'LONG')
-                        self.events.put(signal)
-                        self.bought[s] = True
-                    elif ma1_list[-1] <= ma2_list[-1] and ma1_list[-2] > ma2_list[-2] and self.bought[s] == True:
-                        # MA1均线下穿MA2均线，卖出信号
-                        # (Symbol, Datetime, Type = LONG, SHORT or EXIT)
-                        signal = SignalEvent(bars[0][0], bars[0][1], 'SHORT')
-                        self.events.put(signal)
-                        self.bought[s] = False
+                    if not self.latest_signal_datetime == bars[0][1]:
+                        # 一分钟内仅允许产生一次信号
+                        if self.bought[s] == False:
+                            if (bars[0][5] >= ma2_list[-1]+2) or abs(ma1_list[-1]-ma2_list[-1])<=1 and ma1_list[-2] < ma2_list[-2]:
+                                # MA1均线上穿MA2均线，买入信号
+                                # (Symbol, Datetime, Type = LONG, SHORT or EXIT)
+                                signal = SignalEvent(bars[0][0], bars[0][1], 'LONG')
+                                self.events.put(signal)
+                                self.bought[s] = True
+                                self.latest_signal_datetime = bars[0][1]
+                        else:
+                            if (bars[0][5] <= ma2_list[-1]-2) or abs(ma1_list[-1]-ma2_list[-1])<=1 and ma1_list[-2] > ma2_list[-2]:
+                                # MA1均线下穿MA2均线，卖出信号
+                                # (Symbol, Datetime, Type = LONG, SHORT or EXIT)
+                                signal = SignalEvent(bars[0][0], bars[0][1], 'SHORT')
+                                self.events.put(signal)
+                                self.bought[s] = False
+                                self.latest_signal_datetime = bars[0][1]
                 except:
                     # 存在MA值为NaN的情况，忽略
                     pass
