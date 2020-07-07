@@ -152,4 +152,4 @@ class pyechartsPlotor(object):
                 )
             )
             overlap_kline_line = kline.overlap(line)
-            overlap_kline_line.render(sym+'.html')
+            overlap_kline_line.render('../result/%s.html' % sym)
